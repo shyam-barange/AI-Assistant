@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.ui.graphics.Color
 
 //private val DarkColorScheme = darkColorScheme(
@@ -75,9 +76,15 @@ fun AIAssistantTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+//    val colorScheme = when {
+//        darkTheme -> DarkColorScheme
+//        else -> LightColorScheme
+//    }
+
+    val colorScheme = if (darkTheme) {
+        darkColorScheme()
+    } else {
+        lightColorScheme()
     }
 
     MaterialTheme(
@@ -85,4 +92,5 @@ fun AIAssistantTheme(
         typography = Typography(),
         content = content
     )
+
 }

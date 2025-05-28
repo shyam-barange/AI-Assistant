@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -48,21 +49,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    viewModel: AIAssistantViewModel
+    viewModel: AIAssistantViewModel,
+    onSettingsClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val chatMessages = uiState.chatHistory
     val userName = uiState.userName
 
+    val context = LocalContext.current
     var currentMessage by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Auto-scroll to bottom when new messages arrive
     LaunchedEffect(chatMessages.size) {
         if (chatMessages.isNotEmpty()) {
             coroutineScope.launch {
@@ -71,82 +74,53 @@ fun ChatScreen(
         }
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Top App Bar
+    Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = {
                 Column {
-                    Text(
-                        text = "AI Assistant",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Text("AI Assistant", fontSize = 18.sp)
                     if (userName.isNotEmpty()) {
-                        Text(
-                            text = "Hello, $userName!",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
+                        Text("Hello, $userName!", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
                 }
             },
             actions = {
-                IconButton(onClick = { /* TODO: Settings */ }) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings"
-                    )
+                IconButton(onClick = onSettingsClick) {
+                    Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface)
         )
 
-        // Chat Messages
         LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+            modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp),
             state = listState,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
             if (chatMessages.isEmpty()) {
-                item {
-                    WelcomeMessage(userName = userName)
-                }
+                item { WelcomeMessage(userName = userName) }
             }
 
             items(chatMessages) { message ->
                 ChatMessageItem(
                     message = message,
-                    onCopyMessage = { viewModel.copyMessageToClipboard(it) }
+                    onCopyMessage = { /* No-op */ }
                 )
             }
 
             if (uiState.isLoading) {
-                item {
-                    TypingIndicator()
-                }
+                item { TypingIndicator() }
             }
         }
 
-        // Message Input
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape = RoundedCornerShape(24.dp)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
                 verticalAlignment = Alignment.Bottom
             ) {
                 OutlinedTextField(
@@ -180,17 +154,13 @@ fun ChatScreen(
                     },
                     modifier = Modifier.size(48.dp),
                     containerColor = if (currentMessage.isNotBlank() && !uiState.isLoading)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Send,
                         contentDescription = "Send",
                         tint = if (currentMessage.isNotBlank() && !uiState.isLoading)
-                            Color.White
-                        else
-                            MaterialTheme.colorScheme.outline
+                            Color.White else MaterialTheme.colorScheme.outline
                     )
                 }
             }
