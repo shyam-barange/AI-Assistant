@@ -8,7 +8,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.apply
+import kotlin.collections.remove
 
 data class AIAssistantUiState(
     val isFirstTime: Boolean = true,
@@ -108,4 +111,19 @@ class AIAssistantViewModel : ViewModel() {
     fun copyMessageToClipboard(message: String) {
         // This will be called from the UI with context
     }
+
+    // Add this method to clear chat history
+    fun clearChatHistory(context: Context) {
+        viewModelScope.launch {
+            // Clear messages from the UI state
+//            _uiState.update { currentState ->
+//                currentState.copy(messages = emptyList())
+//            }
+
+            // Clear messages from SharedPreferences
+            val sharedPrefs = context.getSharedPreferences("ai_assistant_prefs", Context.MODE_PRIVATE)
+            sharedPrefs.edit().remove("chat_history").apply()
+        }
+    }
+    
 }
