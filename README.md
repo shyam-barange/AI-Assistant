@@ -84,7 +84,7 @@ Pull requests are welcome! If you’d like to contribute, please fork the repo a
 
 Have questions or suggestions?
 
-* Email: `youremail@example.com`
+* Email: `developer.shyam11@gmail.com`
 * GitHub: [@shyam-barange](https://github.com/shyam-barange)
 
 ---
